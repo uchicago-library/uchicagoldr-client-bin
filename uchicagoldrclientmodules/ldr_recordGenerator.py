@@ -186,9 +186,10 @@ def main():
         # Read all the digital acquisition forms,
         # populate the record with their info, address conflicts
         logger.info("Reading and mapping digital acquisition records.")
-        for acqRecord in args.acquisition_record:
-            meldRecord(record, acqRecord, ReadAcquisitionRecord,
-                       AcquisitionRecordMapping)
+        if args.acquisition_record:
+            for acqRecord in args.acquisition_record:
+                meldRecord(record, acqRecord, ReadAcquisitionRecord,
+                           AcquisitionRecordMapping)
 
         # Manual input loop
         logger.info("Beginning Manual Input Loop")
