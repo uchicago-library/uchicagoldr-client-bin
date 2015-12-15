@@ -11,28 +11,28 @@ import json
 # Third party package imports end #
 
 # Local package imports begin #
-from uchicagoldrLogging.loggers import MasterLogger
-from uchicagoldrLogging.handlers import DefaultTermHandler, DebugTermHandler, \
+from uchicagoldrlogging.loggers import MasterLogger
+from uchicagoldrlogging.handlers import DefaultTermHandler, DebugTermHandler, \
     DefaultFileHandler, DebugFileHandler, DefaultTermHandlerAtLevel,\
     DefaultFileHandlerAtLevel
-from uchicagoldrLogging.filters import UserAndIPFilter
+from uchicagoldrlogging.filters import UserAndIPFilter
 
-from uchicagoldrRecords.record.recordFieldsBooleans import RecordFieldsBooleans
-from uchicagoldrRecords.record.recordFieldsValidation import \
+from uchicagoldrrecords.record.recordFieldsBooleans import RecordFieldsBooleans
+from uchicagoldrrecords.record.recordFieldsValidation import \
     RecordFieldsValidation
-from uchicagoldrRecords.record.recordFieldsDefaults import RecordFieldsDefaults
-from uchicagoldrRecords.fields.ldrFields import LDRFields
-from uchicagoldrRecords.readers.digitalAcquisitionRead import \
+from uchicagoldrrecords.record.recordFieldsDefaults import RecordFieldsDefaults
+from uchicagoldrrecords.fields.ldrFields import LDRFields
+from uchicagoldrrecords.readers.digitalAcquisitionRead import \
     ReadAcquisitionRecord
-from uchicagoldrRecords.readers.dummyReader import DummyReader
-from uchicagoldrRecords.mappers.digitalAcquisitionMap import \
+from uchicagoldrrecords.readers.dummyReader import DummyReader
+from uchicagoldrrecords.mappers.digitalAcquisitionMap import \
     AcquisitionRecordMapping
-from uchicagoldrRecords.mappers.dummyMapper import DummyMapper
-from uchicagoldrRecords.record.recordWriting import instantiateRecord, \
+from uchicagoldrrecords.mappers.dummyMapper import DummyMapper
+from uchicagoldrrecords.record.recordWriting import instantiateRecord, \
     meldRecord, manualInput, booleanLoop, validate, generateFileEntries, \
     computeTotalFileSizeFromRecord, writeNoClobber, createSubRecord
 
-from uchicagoldrStaging.validation.validateBase import ValidateBase
+from uchicagoldrstaging.validation.validateBase import ValidateBase
 # Local package imports end #
 
 # Header info begins #

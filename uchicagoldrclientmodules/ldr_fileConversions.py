@@ -11,11 +11,11 @@ from os.path import split, exists, splitext, basename, isdir, isfile, abspath, \
 # Third party package imports end #
 
 # Local package imports begin #
-from uchicagoldrLogging.loggers import MasterLogger
-from uchicagoldrLogging.handlers import DefaultTermHandler, DebugTermHandler, \
+from uchicagoldrlogging.loggers import MasterLogger
+from uchicagoldrlogging.handlers import DefaultTermHandler, DebugTermHandler, \
     DefaultFileHandler, DebugFileHandler, DefaultTermHandlerAtLevel,\
     DefaultFileHandlerAtLevel
-from uchicagoldrLogging.filters import UserAndIPFilter
+from uchicagoldrlogging.filters import UserAndIPFilter
 
 from uchicagoldr.batch import Batch
 from uchicagoldr.item import Item
