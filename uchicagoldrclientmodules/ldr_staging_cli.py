@@ -4,6 +4,7 @@
 from argparse import ArgumentParser
 from os import _exit
 from os.path import split, exists, isabs
+from pprint import pprint
 # Default package imports end #
 
 # Third party package imports begin #
@@ -15,7 +16,7 @@ from uchicagoldrlogging.handlers import DefaultTermHandler, DebugTermHandler, \
     DefaultFileHandler, DebugFileHandler, DefaultTermHandlerAtLevel,\
     DefaultFileHandlerAtLevel
 from uchicagoldrlogging.filters import UserAndIPFilter
-from uchicagoldrconfig import LDRConfiguration
+from uchicagoldrconfig.LDRConfiguration import LDRConfiguration
 
 from uchicagoldr.batch import StagingDirectory
 # Local package imports end #
@@ -102,7 +103,9 @@ def main():
     )
     parser.add_argument(
                         '-c', '--create',
-                        help="create the specified staging structure on disk."
+                        help="create the specified staging structure on disk.",
+                        action='store_true',
+                        default=False
     )
     parser.add_argument(
                         '-i', '--ingest',
@@ -116,9 +119,16 @@ def main():
                              "if not the default."
     )
     parser.add_argument(
-                        '-v', '--validate',
+                        '--validate',
                         action='store_true',
+                        default=False,
                         help="Validate the staging directory"
+    )
+    parser.add_argument(
+                        '-a', '--audit',
+                        action='store_true',
+                        default=False,
+                        help="Audit the staging directory and contents."
     )
     parser.add_argument(
                         '--alt-config-dir',
@@ -132,6 +142,9 @@ def main():
     )
     parser.add_argument(
                         '-p', '--prefix'
+    )
+    parser.add_argument(
+                        '-e', '--containing_folder'
     )
     parser.add_argument(
                         '--regex'
@@ -153,7 +166,7 @@ def main():
         if not exists(split(args.log_loc)[0]):
             logger.critical("The specified log location does not exist!")
             return(1)
-    if args.alt_config:
+    if args.alt_config_dir:
         if not isabs(args.alt_config_dir):
             logger.critical("Alternate configuration locations must be " +
                             "specified via absolute paths!")
@@ -196,9 +209,11 @@ def main():
 
     # Configuration parsing and population begins
     if args.alt_config_dir:
-        config = LDRConfiguration(args.alt_config_dir).read_config_data()
+        configObj = LDRConfiguration(args.alt_config_dir)
+        config = configObj.read_config_data()
     else:
-        config = LDRConfiguration().read_config_data()
+        configObj = LDRConfiguration()
+        config = configObj.read_config_data()
     # Configuration parsing ends
 
     try:
@@ -209,18 +224,84 @@ def main():
             root = config['staging']['staging_root_path']
         ark, ead, accno = args.ark, args.ead, args.accno
         staging_dir = StagingDirectory(root, ark, ead, accno)
+        if args.create:
+            created = staging_dir.spawn()
+            if created[0] is not True:
+                logger.critical(
+                    'There was a problem with spawning your directories.'
+                )
+                logger.critical(str(created))
+                return(1)
+            else:
+                for entry in created[1]:
+                    logger.info('Created: {}'.format(entry))
         staging_dir.populate()
         if args.containing_folder:
             for ingest_dir in args.ingest:
                 if args.regex:
-                    staging_dir.ingest(ingest_dir,
-                                       containing_folder=args.containing_folder,
-                                       rehash=args.rehash,
-                                       pattern=args.regex)
+                    cont_folder = staging_dir.ingest(
+                        ingest_dir,
+                        containing_folder=args.containing_folder,
+                        rehash=args.rehash,
+                        pattern=args.regex
+                    )
+                    validation = staging_dir._validate_contained_folder(
+                        cont_folder)
+                    logger.debug(validation)
+                    if validation[0] is not True:
+                        logger.warn("There was an issue with the transfer.")
+                        for line in pprint(validation[1]).split('\n'):
+                            logger.warn(line)
                 else:
-                    staging_dir.ingest(ingest_dir,
-                                       containing_folder=args.containing_folder,
-                                       rehash=args.rehash)
+                    cont_folder = staging_dir.ingest(
+                        ingest_dir,
+                        containing_folder=args.containing_folder,
+                        rehash=args.rehash
+                    )
+                    validation = staging_dir._validate_contained_folder(
+                        cont_folder)
+                    logger.debug(validation)
+                    if validation[0] is not True:
+                        logger.warn("There was an issue with the transfer.")
+                        for line in pprint(validation[1]).split('\n'):
+                            logger.warn(line)
+        if args.prefix:
+            for ingest_dir in args.ingest:
+                if args.regex:
+                    cont_folder = staging_dir.ingest(
+                        ingest_dir,
+                        prefix=args.prefix,
+                        rehash=args.rehash,
+                        pattern=args.regex
+                    )
+                    validation = staging_dir._validate_contained_folder(
+                        cont_folder)
+                    logger.debug(validation)
+                    if validation[0] is not True:
+                        logger.warn("There was an issue with the transfer.")
+                        for line in pprint(validation[1]).split('\n'):
+                            logger.warn(line)
+                else:
+                    cont_folder = staging_dir.ingest(
+                        ingest_dir,
+                        prefix=args.prefix,
+                        rehash=args.rehash
+                    )
+                    validation = staging_dir._validate_contained_folder(
+                        cont_folder)
+                    logger.debug(validation)
+                    if validation[0] is not True:
+                        logger.warn("There was an issue with the transfer.")
+                        for line in pprint(validation[1]).split('\n'):
+                            logger.warn(line)
+
+        if args.validate:
+            validation = staging_dir.validate()
+            logger.debug(validation)
+            if validation[0] is not True:
+                logger.warn("This directory is not valid.")
+                for line in pprint(validation[1]).split('\n'):
+                    logger.warn(line)
 
         # End module code #
         logger.info("ENDS: COMPLETE")
